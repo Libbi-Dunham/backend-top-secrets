@@ -22,21 +22,20 @@ describe('backend-top-secrets routes', () => {
       id: expect.any(String),
       email: 'miklo@test.com',
     });
+  });
+  it('signs in an existing user', async () => {
+    const user = await UserService.create({
+      email: 'miklo@test.com',
+      password: 'ilovetreats',
+    });
 
-    it('signs in an existing user', async () => {
-      const user = await UserService.create({
-        email: 'miklo@test.com',
-        password: 'ilovetreats',
-      });
+    const res = await request(app)
+      .post('/api/v1/user/session')
+      .send({ email: 'miklo@test.com', password: 'ilovetreats' });
 
-      const res = await request(app)
-        .post('/api/v1/user/session')
-        .send({ email: 'miklo@test.com', password: 'ilovetreats' });
-
-      expect(res.body).toEqual({
-        message: 'successfully signed in',
-        user,
-      });
+    expect(res.body).toEqual({
+      message: 'Successfully signed in',
+      user,
     });
   });
 });
