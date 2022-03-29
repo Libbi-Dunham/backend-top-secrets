@@ -38,4 +38,24 @@ describe('backend-top-secrets routes', () => {
       user,
     });
   });
+
+  it('protects routes using authenticate', async () => {
+    const agent = request.agent(app);
+    await UserService.create({
+      email: 'miklo@test.com',
+      password: 'ilovetreats',
+    });
+
+    let res = await agent.get('/api/v1/user/private');
+    expect(res.status).toEqual(401);
+
+    await agent
+      .post('/api/v1/user/session')
+      .send({ email: 'miklo@test.com', password: 'ilovetreats' });
+    res = await agent.get('/api/v1/user/private');
+
+    expect(res.body).toEqual({
+      message: 'You can only see this if you are logged in',
+    });
+  });
 });
