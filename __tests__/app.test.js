@@ -3,7 +3,6 @@ const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
 const UserService = require('../lib/services/UserService');
-const res = require('express/lib/response');
 
 describe('backend-top-secrets routes', () => {
   beforeEach(() => {
@@ -94,5 +93,27 @@ describe('backend-top-secrets routes', () => {
       success: true,
       message: 'Successfully signed out',
     });
+  });
+
+  it('allows a authorized user to create secrets', async () => {
+    const agent = request.agent(app);
+
+    await UserService.create({
+      email: 'miklo@test.com',
+      password: 'ilovetreats',
+    });
+
+    await agent
+      .post('/api/v1/user/sessions')
+      .send({ email: 'miklo@test.com', password: 'ilovetreats' });
+
+    const secrets = {
+      title: 'I like chicken over tuna',
+      description: 'its better',
+      createdAt: expect.any(String),
+    };
+
+    const res = await request(app).post('/api/v1/secrets').send(secrets);
+    expect(res.body).toEqual({ id: expect.any(String), ...secrets });
   });
 });
