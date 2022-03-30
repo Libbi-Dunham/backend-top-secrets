@@ -3,6 +3,7 @@ const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
 const UserService = require('../lib/services/UserService');
+const res = require('express/lib/response');
 
 describe('backend-top-secrets routes', () => {
   beforeEach(() => {
@@ -57,5 +58,23 @@ describe('backend-top-secrets routes', () => {
     expect(res.body).toEqual({
       message: 'You can only see this if you are logged in',
     });
+  });
+
+  it('allows the user to view a list of secrets', async () => {
+    const agent = request.agent(app);
+
+    await UserService.create({
+      email: 'miklo@test.com',
+      password: 'ilovetreats',
+    });
+
+    let res = await agent.get('/api/v1/secrets');
+    expect(res.status).toEqual(401);
+
+    await agent
+      .post('/api/v1/user/session')
+      .send({ email: 'miklo@test.com', password: 'ilovetreats' });
+    res = await agent.get('/api/v1/secrets');
+    expect(res.status).toEqual(200);
   });
 });
