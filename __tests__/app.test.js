@@ -73,10 +73,22 @@ describe('backend-top-secrets routes', () => {
     await agent
       .post('/api/v1/user/session')
       .send({ email: 'miklo@test.com', password: 'ilovetreats' });
-    // make secrets or put in sql file
     res = await agent.get('/api/v1/secrets');
+    expect(res.body).toEqual([
+      {
+        id: '1',
+        title: 'my secret',
+        description: 'i like walks',
+        createdAt: expect.any(String),
+      },
+      {
+        id: '2',
+        title: 'my second secret',
+        description: 'chicken is my fav treat',
+        createdAt: expect.any(String),
+      },
+    ]);
     expect(res.status).toEqual(200);
-    // expect all secrets that I have in database^ (78)
   });
 
   it('should delete a log out user', async () => {
